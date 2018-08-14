@@ -58,12 +58,12 @@ class SignalServer extends EventEmitter {
 		return contract;
 	}
 
-	send(data, dest) {
+	async send(data, dest) {
 		if ( !this.contract ) {
 			throw new Error("Contract has not yet been loaded");
 		}
 
-		this.contract.signal(this.address, dest, JSON.stringify(data), { from: this.address, to: dest });
+		await this.contract.signal(this.address, dest, JSON.stringify(data), { from: this.address });
 	}
 
 	async startListening() {
@@ -71,11 +71,12 @@ class SignalServer extends EventEmitter {
 			throw new Error("Contract has not yet been loaded");
 		}
 
-		console.log(this.address);
+		console.log('Sending requests from', this.address);
 		const listen = await this.contract.Signal.listen({ to: this.address });
 		
 		listen.on('event', event => {
-			this.emit('data', JSON.parse(event._msg), event);
+			console.log('Received event', event);
+			this.emit('data', JSON.parse(event.signal), event);
 		});
 	}
 }
