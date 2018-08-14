@@ -32,7 +32,7 @@ function validateArgs(args) {
 async function main(args) {
 	const { pos, dest } = validateArgs(args);
 
-	if ( !pos ) return;
+	if ( !pos || !dest ) return;
 
 	const signal = new SignalServer("usual dream c1ay mimic dad suspect mercy amused leader save trip chase");
 	await signal.load();
@@ -47,7 +47,7 @@ async function main(args) {
 
 	peer.on('signal', data => {
 		console.log('Sending signal data', data);
-		signal.send(data);
+		signal.send(data, dest);
 	});
 
 	// Signal
