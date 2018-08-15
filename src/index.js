@@ -1,6 +1,4 @@
-const Peer = require('simple-peer');
-const wrtc = require('wrtc');
-const SignalServer = require('./signal.js');
+const EthPeer = require('./peer');
 
 function printUsage(args) {
 	console.log('Usage: ', args[0] + ' ' + args[1] + ' [prim/sec] [address]');
@@ -9,63 +7,41 @@ function printUsage(args) {
 function validateArgs(args) {
 	if ( args.length != 4 ) {
 		printUsage(args);
-		return { pos: null, dest: null };
+		return { pos: null, dest: null, mnemonic: null };
 	}
 
 	const pos = args[2];
 
 	if ( args[2] != 'prim' && args[2] != 'sec' ) {
 		printUsage(args);
-		return { pos: null, dest: null };
+		return { pos: null, dest: null, mnemonic: null };
 	}
 
 	const dest = args[3];
 
 	if ( !dest.startsWith('0x') ) {
 		printUsage(args);
-		return { pos: null, dest: null };
+		return { pos: null, dest: null, mnemonic: null };
 	}
 
-	return { pos, dest };
-}
+	const test_mnemonics = {
+		'prim': 'usual dream c1ay mimic dad suspect mercy amused leader save trip chase',
+		'sec': undefined
+	};
 
-// Two testing mnemonics
-// Both have rinkeby ETH
-const test_mnemonics = {
-	'prim': 'usual dream c1ay mimic dad suspect mercy amused leader save trip chase',
-	'sec': undefined
+	return { initiator: pos == 'prim', dest, mnemonic: test_mnemonics[pos] };
 }
 
 async function main(args) {
-	const { pos, dest } = validateArgs(args);
+	const { initiator, dest, mnemonic } = validateArgs(args);
 
-	if ( !pos || !dest ) return;
+	if ( !dest ) return;
 
-	const signal = new SignalServer(test_mnemonics[pos]);
-	await signal.load();
+	const peer = new EthPeer(mnemonic);
 
-	// Start p2p
-	const peer = new Peer({ initiator: args[2] == 'prim', wrtc });
+	peer.on('connect', () => {
+		console.log('Peer Connected. Sending data.');
 
-	peer.on('connect', () => console.log('Peer Connected'));
-	peer.on('data', x => console.log('Data', x));
-	peer.on('error', e => console.error('Error', e));
-
-	peer.on('signal', data => {
-		console.log('Sending signal data');
-
-		signal.send(data, dest).then(() => {
-			console.log('Successfully sent data');
-		}).catch(err => {
-			console.error('Failed to send signal data');
-		});
-	});
-
-	// Signal
-	signal.on('data', data => peer.signal(data));
-
-	setTimeout(() => {
-		console.log('Starting to send data');
 		// Send data occassionally
 		setInterval(() => {
 			try {
@@ -76,7 +52,13 @@ async function main(args) {
 				console.log('Failed to send data');
 			}
 		}, 5 * 1000);
-	}, 90 * 1000);
+	});
+
+	peer.on('signal', console.log);
+	peer.on('data', x => console.log('Data', x));
+	// peer.on('error', e => console.error('Error', e));
+
+	peer.connect(initiator, dest);
 }
 
 main(process.argv);
