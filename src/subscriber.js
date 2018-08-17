@@ -102,11 +102,7 @@ async function main(args) {
 		console.log('Done');
 	}
 
-	provider.listenSubscribes({
-		subscriber: accounts[0]
-	}, (err, event) => {
-		if ( err ) throw err;
-
+	const startData = () => {
 		const peer = new EthPeer(mnemonic);
 
 		peer.on('connect', () => {
@@ -130,9 +126,48 @@ async function main(args) {
 		peer.on('error', e => console.error('Error', e));
 
 		peer.connect(false, provider.providerOwner);
+	};
+
+	provider.listenSubscribes({
+		subscriber: accounts[0]
+	}, (err, event) => {
+		if ( err ) throw err;
+
+		startData();
 	});
 
 	console.log('Making the subscription');
+
+	const status = await subscriber.zapArbiter.getSubscription({ provider: provider.providerOwner, subscriber: subscriber.subscriberOwner, endpoint });
+	const blockEnd = +status.preBlockEnd;
+
+	if ( blockEnd > 0 ) {
+		console.log('Found an active subscription ending at', blockEnd);
+		const current = await web3.eth.getBlockNumber();
+
+		if ( current > blockEnd ) {
+			console.log('Current subscription expired', current - blockEnd, 'blocks ago.');
+			console.log('Ending subscription...');
+
+			await subscriber.zapArbiter.endSubscriptionSubscriber({
+				from: subscriber.subscriberOwner,
+				provider: provider.providerOwner,
+				endpoint
+			});
+
+			console.log('Done');
+		}
+		else {
+			console.log('Current subscription good for', blockEnd - current);
+			startData();
+			return;
+		}
+	}
+	else {
+		console.log('No subscription found.');
+	}
+
+	console.log('Subscribing...');
 	await subscriber.subscribe({
 		provider: provider.providerOwner,
 		endpoint,
