@@ -1,3 +1,4 @@
+const assert = require('assert');
 const Peer = require('simple-peer');
 const EventEmitter = require('events');
 const SignalServer = require('./signal.js');
@@ -17,6 +18,7 @@ class EthPeer extends EventEmitter {
 		if ( !(await this.signal.getPermissions(address)) ) {
 			console.log('Giving', address, 'permission to signal...');
 			await this.signal.setPermissions(address, true);
+			assert(await this.signal.getPermissions(address));
 			console.log('Permission granted');
 		}
 		else {
