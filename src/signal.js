@@ -2,7 +2,7 @@ const EventEmitter = require('events');
 const fs = require('fs');
 
 const HDWalletProvider = require('truffle-hdwallet-provider');
-const Wei = require('weijs');
+const Web3 = require('web3');
 
 const SignalServerArtifacts = 'contract/build/contracts/SignalServer.json';
 
@@ -10,17 +10,18 @@ class SignalServer extends EventEmitter {
 	constructor(mnemonic) {
 		super();
 
-		this.provider = new HDWalletProvider(mnemonic, 'https://rinkeby.infura.io/tOYbxwjtu0vJT4pG7TLH');
-		this.wei = new Wei(this.provider);
+		this.provider = new HDWalletProvider(mnemonic, 'wss://rinkeby.infura.io/ws/xeb916AFjrcttuQlezyq');
+		this.web3 = new Web3(this.provider);
 	}
 
 	async load() {
-		await this.wei.accountsPromise;
-		if ( this.wei.accounts.length == 0 ) {
+		const accounts = await this.web3.eth.getAccounts();
+
+		if ( accounts.length == 0 ) {
 			throw new Error('Unable to find any accounts');
 		}
 
-		this.address = this.wei.accounts.get(0).address;
+		this.address = accounts[0];
 		this.contract = await this._loadContract();
 		
 		await this.startListening();
@@ -29,15 +30,18 @@ class SignalServer extends EventEmitter {
 	async _loadContract() {
 		const SignalContract = JSON.parse(fs.readFileSync(SignalServerArtifacts));
 		const abi = SignalContract.abi;
-		const contract = this.wei.contract(SignalContract.abi);
-
-		const network = await this.wei.rpc.net.version();
+		let contract = new this.web3.eth.Contract(SignalContract.abi);
+		const network = (await this.web3.eth.net.getId()).toString();
 
 		if ( !(network in SignalContract.networks) ) {
 			console.log('Cant use this network - no contract deployed there');
 			console.log('Deploying a contract now.');
 
-			await contract.deploy(SignalContract.bytecode, { from: this.address });
+			contract = await contract.deploy({
+				data: SignalContract.bytecode
+			}).send({
+				from: this.address
+			});
 
 			SignalContract.networks[network] = {
 				events: {},
@@ -52,10 +56,14 @@ class SignalServer extends EventEmitter {
 		else {
 			const address = SignalContract.networks[network].address;
 			console.log('Using contract at', address);
-			contract.at(address);
+			contract.options.address = address;
 		}
 
 		return contract;
+	}
+
+	async setPermissions(dest, allowed) {
+		return await this.contract.methods.setPermissions(dest, allowed).send({ from: this.address });
 	}
 
 	async send(data, dest) {
@@ -63,7 +71,7 @@ class SignalServer extends EventEmitter {
 			throw new Error("Contract has not yet been loaded");
 		}
 
-		await this.contract.signal(this.address, dest, JSON.stringify(data), { from: this.address });
+		await this.contract.methods.signal(dest, JSON.stringify(data)).send({ from: this.address });
 	}
 
 	async startListening() {
@@ -72,11 +80,15 @@ class SignalServer extends EventEmitter {
 		}
 
 		console.log('Sending requests from', this.address);
-		const listen = await this.contract.Signal.listen({ to: this.address });
-		
-		listen.on('event', event => {
-			console.log('Received event', event);
-			this.emit('data', JSON.parse(event.signal), event);
+
+		this.contract.events.Signal({
+			filter: {to: this.address }
+		}, (err, event) => {
+			if ( err ) {
+				throw err;
+			}
+
+			this.emit('data', JSON.parse(event.returnValues.signal), event);
 		});
 	}
 }

@@ -9,10 +9,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "kademlia": "^0.2.0",
     "simple-peer": "^9.1.2",
     "truffle-hdwallet-provider": "git+https://github.com/zapproject/truffle-hdwallet-provider.git",
-    "weijs": "git+https://github.com/block8437/weijs.git",
     "wrtc": "^0.1.6"
   }
 }

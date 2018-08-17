@@ -54,9 +54,9 @@ async function main(args) {
 		}, 5 * 1000);
 	});
 
-	peer.on('signal', console.log);
+	peer.on('signal', x => console.log('Signaling'));
 	peer.on('data', x => console.log('Data', x));
-	// peer.on('error', e => console.error('Error', e));
+	peer.on('error', e => console.error('Error', e));
 
 	peer.connect(initiator, dest);
 }
