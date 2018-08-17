@@ -66,15 +66,15 @@ class SignalServer extends EventEmitter {
 		if ( !this.contract ) {
 			throw new Error("Contract has not yet been loaded");
 		}
-		
-		return await this.contract.methods.getPermissions(this.address, dest).call();
+
+		return await this.contract.methods.getPermissions(dest, this.address).call();
 	}
 
 	async setPermissions(dest, allowed) {
 		if ( !this.contract ) {
 			throw new Error("Contract has not yet been loaded");
 		}
-		
+
 		return await this.contract.methods.setPermissions(dest, allowed).send({ from: this.address });
 	}
 
