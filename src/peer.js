@@ -1,7 +1,9 @@
 const Peer = require('simple-peer');
-const wrtc = require('wrtc');
 const EventEmitter = require('events');
 const SignalServer = require('./signal.js');
+
+// Only use wrtc when theres no window.
+const wrtc = typeof window == 'undefined' ? require('wrtc') : undefined;
 
 class EthPeer extends EventEmitter {
 	constructor(mnemonic) {
@@ -47,7 +49,7 @@ class EthPeer extends EventEmitter {
 		if ( !this.peer ) {
 			throw new Error("Attempted to send while the peer wasn't conneted");
 		}
-		
+
 		await this.peer.send(data);
 	}
 }
