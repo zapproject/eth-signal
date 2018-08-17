@@ -10,6 +10,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@zapjs/artifacts": "^2.0.12",
+    "@zapjs/provider": "^2.0.12",
+    "@zapjs/subscriber": "^2.0.9",
     "simple-peer": "^9.1.2",
     "truffle-hdwallet-provider": "git+https://github.com/zapproject/truffle-hdwallet-provider.git",
     "wrtc": "^0.1.6"
