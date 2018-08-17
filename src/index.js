@@ -55,6 +55,7 @@ async function main(args) {
 	});
 
 	peer.on('signal', x => console.log('Signaling'));
+	peer.on('signaled', x => console.log('Signaled'));
 	peer.on('data', x => console.log('Data', x));
 	peer.on('error', e => console.error('Error', e));
 

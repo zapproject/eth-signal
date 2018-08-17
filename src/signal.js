@@ -62,6 +62,10 @@ class SignalServer extends EventEmitter {
 		return contract;
 	}
 
+	async getPermissions(dest) {
+		return await this.contract.methods.getPermissions(this.address, dest).call();
+	}
+
 	async setPermissions(dest, allowed) {
 		return await this.contract.methods.setPermissions(dest, allowed).send({ from: this.address });
 	}

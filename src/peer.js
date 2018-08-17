@@ -14,9 +14,14 @@ class EthPeer extends EventEmitter {
 	async connect(initiator, address) {
 		await this.signal.load();
 
-		console.log('Giving', address, 'permission to signal...');
-		await this.signal.setPermissions(address, true);
-		console.log('Permission granted');
+		if ( !(await this.signal.getPermissions(address)) ) {
+			console.log('Giving', address, 'permission to signal...');
+			await this.signal.setPermissions(address, true);
+			console.log('Permission granted');
+		}
+		else {
+			console.log(address, 'already has permission to signal');
+		}
 
 		this.peer = new Peer({ initiator, wrtc });
 
@@ -41,6 +46,7 @@ class EthPeer extends EventEmitter {
 		});
 
 		this.signal.on('data', data => {
+			this.emit('signaled');
 			this.peer.signal(data);
 		});
 	}

@@ -4,7 +4,8 @@
   "description": "WebRTC SDP Signaling over an Ethereum Testnet",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "run-prim": "node src/index.js prim 0x959fd7ef9089b7142b6b908dc3a8af7aa8ff0fa1",
+    "run-sec": "node src/index.js sec 0xb748b0dea992b00424ec20f0d4c195f96c094154"
   },
   "author": "",
   "license": "ISC",

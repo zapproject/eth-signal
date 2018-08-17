@@ -1,8 +1,13 @@
 pragma solidity ^0.4.24;
+
 contract SignalServer {
 	mapping (address => mapping(address => bool)) canSend;
 
 	event Signal(address indexed from, address indexed to, string signal);
+
+	function getPermissions(address from, address to) public view returns (bool) {
+		return canSend[from][to];
+	}
 
 	function setPermissions(address dest, bool value) external {
 		canSend[dest][msg.sender] = value;
