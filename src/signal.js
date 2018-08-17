@@ -10,7 +10,7 @@ class SignalServer extends EventEmitter {
 	constructor(mnemonic) {
 		super();
 
-		this.provider = new HDWalletProvider(mnemonic, 'wss://rinkeby.infura.io/ws/xeb916AFjrcttuQlezyq');
+		this.provider = new HDWalletProvider(mnemonic, 'wss://kovan.infura.io/ws/xeb916AFjrcttuQlezyq');
 		this.web3 = new Web3(this.provider);
 	}
 

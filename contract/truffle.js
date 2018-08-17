@@ -15,5 +15,13 @@ module.exports = {
 			gas: 4500000,
 			gasPrice: 10000000000,
 		},
+		kovan: {
+			provider: function() { 
+				return new HDWalletProvider("usual dream c1ay mimic dad suspect mercy amused leader save trip chase", 'https://kovan.infura.io/xeb916AFjrcttuQlezyq') 
+			},
+			network_id: '42',
+			gas: 4500000,
+			gasPrice: 10000000000,
+		},
 	}
 };
