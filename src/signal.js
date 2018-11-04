@@ -1,10 +1,7 @@
 const EventEmitter = require('events');
-const fs = require('fs');
-
 const HDWalletProvider = require('truffle-hdwallet-provider');
 const Web3 = require('web3');
-
-const SignalServerArtifacts = 'contract/build/contracts/SignalServer.json';
+const SignalContract = require('../contract/build/contracts/SignalServer.json');
 
 class SignalServer extends EventEmitter {
 	constructor(mnemonic) {
@@ -23,18 +20,17 @@ class SignalServer extends EventEmitter {
 
 		this.address = accounts[0];
 		this.contract = await this._loadContract();
-		
+
 		await this.startListening();
 	}
 
 	async _loadContract() {
-		const SignalContract = JSON.parse(fs.readFileSync(SignalServerArtifacts));
-		const abi = SignalContract.abi;
 		let contract = new this.web3.eth.Contract(SignalContract.abi);
 		const network = (await this.web3.eth.net.getId()).toString();
 
 		if ( !(network in SignalContract.networks) ) {
 			console.log('Cant use this network - no contract deployed there');
+			if (process.env.APP_ENV === 'browser') return;
 			console.log('Deploying a contract now.');
 
 			contract = await contract.deploy({
@@ -50,7 +46,7 @@ class SignalServer extends EventEmitter {
 			};
 
 			console.log('Contract deployed to', contract.address);
-
+			const fs = require('fs');
 			fs.writeFileSync(SignalServerArtifacts, JSON.stringify(SignalContract, 0, 4));
 		}
 		else {

@@ -4,17 +4,27 @@
   "description": "WebRTC SDP Signaling over an Ethereum Testnet",
   "main": "src/index.js",
   "scripts": {
-    "run-prim": "node src/index.js prim 0x959fd7ef9089b7142b6b908dc3a8af7aa8ff0fa1",
-    "run-sec": "node src/index.js sec 0xb748b0dea992b00424ec20f0d4c195f96c094154"
+    "prov": "node src/oracle.js",
+    "sub": "node src/subscriber.js",
+    "clean": "rm -rf dist",
+    "build": "npm run clean && webpack --config webpack.prod.js",
+    "dev": "npm run clean && webpack-dev-server --config webpack.dev.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@zapjs/artifacts": "^2.0.12",
-    "@zapjs/provider": "^2.0.12",
-    "@zapjs/subscriber": "^2.0.9",
+    "@zapjs/artifacts": "^2.0.16",
+    "@zapjs/provider": "^2.0.16",
+    "@zapjs/subscriber": "^2.0.12",
     "simple-peer": "^9.1.2",
     "truffle-hdwallet-provider": "git+https://github.com/zapproject/truffle-hdwallet-provider.git",
-    "wrtc": "^0.1.6"
+    "wrtc": "^0.1.6",
+    "zapjs": "^1.0.10"
+  },
+  "devDependencies": {
+    "webpack": "^4.22.0",
+    "webpack-cli": "^3.1.2",
+    "webpack-dev-server": "^3.1.10",
+    "webpack-merge": "^4.1.4"
   }
 }

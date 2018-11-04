@@ -9,11 +9,11 @@ function printUsage(args) {
 	console.log('Usage: ', args[0] + ' ' + args[1] + ' [prim/sec] [address]');
 }
 
-const mnemonic = undefined;
+const mnemonic = "shoulder climb hour about pave enemy alert decrease field basic lunch stairs";//undefined;
 
 async function loadProvider(web3, owner) {
 	const contracts = {
-		artifactsDir: path.join(__dirname, '../', 'node_modules/@zapjs/artifacts/contracts/'),
+		artifactsDir: process.env.APP_ENV === 'browser' ? null : path.join(__dirname, '../', 'node_modules/@zapjs/artifacts/contracts/'),
 		networkId: (await web3.eth.net.getId()).toString(),
 		networkProvider: web3.currentProvider,
 	};
@@ -35,7 +35,7 @@ async function loadProvider(web3, owner) {
 
 async function loadSubscriber(web3, owner) {
 	const contracts = {
-		artifactsDir: path.join(__dirname, '../', 'node_modules/@zapjs/artifacts/contracts/'),
+		artifactsDir: process.env.APP_ENV === 'browser' ? null : path.join(__dirname, '../', 'node_modules/@zapjs/artifacts/contracts/'),
 		networkId: (await web3.eth.net.getId()).toString(),
 		networkProvider: web3.currentProvider,
 	};
@@ -60,29 +60,26 @@ async function main(args) {
 	const web3 = new Web3(_provider);
 	const accounts = await web3.eth.getAccounts();
 	const subscriber = await loadSubscriber(web3, accounts[0]);
-	const provider = await loadProvider(web3, '0xB748B0dea992b00424eC20f0D4C195F96c094154');
+	const provider = await loadProvider(web3, '0x3D590BB2d1Bdd3e6cfdB0C6Fc35F3c537D30a59D');
 
+	console.log(accounts);
 	if ( (await provider.getTitle()).length == 0 ) {
 		console.log('Provider not initialized.');
 		return;
 	}
-	else {
-		console.log('Title of provider is', await provider.getTitle());
-	}
+	console.log('Title of provider is', await provider.getTitle());
 
-	const endpoint = "data";
+	const endpoint = "data3";
 	const endpoints = await provider.getEndpoints();
 
 	if ( endpoints.indexOf(endpoint) < 0 ) {
 		console.log('Provider does not have the', endpoint, 'endpoint');
 		return;
 	}
-	else {
-		console.log('Found the', endpoint, 'endpoint');
-	}
+	console.log('Found the', endpoint, 'endpoint');
 
 	const boundDots = await provider.getBoundDots({ endpoint, subscriber: accounts[0] });
-
+    console.log('BOUND DOTS: ', boundDots);
 	if ( boundDots < 10 ) {
 		console.log('Bonding 10 DOTs');
 		const zapBal = await subscriber.getZapBalance();
@@ -120,8 +117,8 @@ async function main(args) {
 			}, 5 * 1000);
 		});
 
-		peer.on('signal', x => console.log('Signaling'));
-		peer.on('signaled', x => console.log('Signaled'));
+		peer.on('signal', x => console.log('Signaling', x));
+		peer.on('signaled', x => console.log('Signaled', x));
 		peer.on('data', x => console.log('Data', x));
 		peer.on('error', e => console.error('Error', e));
 

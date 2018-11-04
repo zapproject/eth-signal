@@ -8,11 +8,12 @@ function printUsage(args) {
 	console.log('Usage: ', args[0] + ' ' + args[1] + ' [prim/sec] [address]');
 }
 
-const mnemonic = 'usual dream c1ay mimic dad suspect mercy amused leader save trip chase';
+// const mnemonic = 'usual dream c1ay mimic dad suspect mercy amused leader save trip chase';
+const mnemonic = 'over isolate tobacco scout cost noise term miss very phone language asset voice whisper prefer';
 
 async function loadProvider(web3, owner) {
 	const contracts = {
-		artifactsDir: path.join(__dirname, '../', 'node_modules/@zapjs/artifacts/contracts/'),
+		artifactsDir: process.env.APP_ENV === 'browser' ? null : path.join(__dirname, '../', 'node_modules/@zapjs/artifacts/contracts/'),
 		networkId: (await web3.eth.net.getId()).toString(),
 		networkProvider: web3.currentProvider,
 	};
@@ -38,7 +39,7 @@ async function main(args) {
 	const web3 = new Web3(_provider);
 	const accounts = await web3.eth.getAccounts();
 	const provider = await loadProvider(web3, accounts[0]);
-
+    console.log(accounts[0]);
 	if ( (await provider.getTitle()).length == 0 ) {
 		console.log('Initializing provider...');
 		await provider.initiateProvider({ title: "realtimeoracle", public_key: '0x1234' });
@@ -48,9 +49,10 @@ async function main(args) {
 		console.log('Title of provider is', await provider.getTitle());
 	}
 
-	const endpoint = "data";
+	const endpoint = "data3";
 	const endpoints = await provider.getEndpoints();
 
+    console.log(endpoints);
 	if ( endpoints.indexOf(endpoint) < 0 ) {
 		console.log('Initiating endpoint', endpoint);
 		await provider.initiateProviderCurve({
@@ -84,8 +86,8 @@ async function main(args) {
 			}, 5 * 1000);
 		});
 
-		peer.on('signal', x => console.log('Signaling'));
-		peer.on('signaled', x => console.log('Signaled'));
+		peer.on('signal', x => console.log('Signaling', x));
+		peer.on('signaled', x => console.log('Signaled', x));
 		peer.on('data', x => console.log('Data', x));
 		peer.on('error', e => console.error('Error', e));
 
